@@ -10,6 +10,8 @@ import com.github.alexthe666.iceandfire.entity.ai.StymphalianBirdAITarget;
 import com.github.alexthe666.iceandfire.entity.util.IAnimalFear;
 import com.github.alexthe666.iceandfire.entity.util.IVillagerFear;
 import com.github.alexthe666.iceandfire.entity.util.StymphalianBirdFlock;
+import com.github.alexthe666.iceandfire.entity.util.Maths;
+import com.github.alexthe666.iceandfire.misc.IafBlockPos;
 import com.github.alexthe666.iceandfire.misc.IafSoundRegistry;
 import com.google.common.base.Predicate;
 import net.minecraft.core.BlockPos;
@@ -45,7 +47,7 @@ import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.UUID;
 
-public class EntityStymphalianBird extends Monster implements IAnimatedEntity, Enemy, IVillagerFear, IAnimalFear {
+public class EntityStymphalianBird extends TamableAnimal implements IAnimatedEntity, IVillagerFear, IAnimalFear {
 
     public static final Predicate<Entity> STYMPHALIAN_PREDICATE = new Predicate<Entity>() {
         @Override
@@ -70,7 +72,7 @@ public class EntityStymphalianBird extends Monster implements IAnimatedEntity, E
     private boolean aiFlightLaunch = false;
     private int airBorneCounter;
 
-    public EntityStymphalianBird(EntityType<? extends Monster> t, Level worldIn) {
+    public EntityStymphalianBird(EntityType<? extends enemy> t, Level worldIn) {
         super(t, worldIn);
     }
 
@@ -117,7 +119,22 @@ public class EntityStymphalianBird extends Monster implements IAnimatedEntity, E
     public int getExperienceReward() {
         return 10;
     }
-
+    
+    @Override
+    protected void registerGoals() {
+        this.goalSelector.addGoal(1, new FloatGoal(this));
+        this.goalSelector.addGoal(3, new CockatriceAIFollowOwner(this, 1.0D, 7.0F, 2.0F));
+        this.goalSelector.addGoal(3, new SitWhenOrderedToGoal(this));
+        this.goalSelector.addGoal(3, new AvoidEntityGoal<>(this, LivingEntity.class, 14.0F, 1.0D, 1.0D, new Predicate<LivingEntity>() {
+            @Override
+            public boolean apply(@Nullable LivingEntity entity) {
+                if (entity instanceof Player) {
+                    return !((Player) entity).isCreative() && !entity.isSpectator();
+                } else {
+                }
+            }
+        }));
+        
     @Override
     public void tick() {
         super.tick();
