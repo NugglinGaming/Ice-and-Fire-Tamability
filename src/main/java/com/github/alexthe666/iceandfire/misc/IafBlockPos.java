@@ -1,4 +1,4 @@
-package com.github.alexthe666.alexsmobs.misc;
+package com.github.alexthe666.iceandfire.misc;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
