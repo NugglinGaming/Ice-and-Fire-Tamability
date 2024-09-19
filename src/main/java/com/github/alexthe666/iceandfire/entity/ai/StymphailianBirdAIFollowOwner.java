@@ -1,10 +1,9 @@
-package com.github.alexthe666.alexsmobs.entity.ai;
+package com.github.alexthe666.iceandfire.entity.ai;
 
-import com.github.alexthe666.alexsmobs.AlexsMobs;
-import com.github.alexthe666.alexsmobs.entity.EntityCrow;
-import com.github.alexthe666.alexsmobs.entity.util.Maths;
-import com.github.alexthe666.alexsmobs.message.MessageCrowMountPlayer;
-import com.github.alexthe666.alexsmobs.misc.AMBlockPos;
+import com.github.alexthe666.iceandfire.IceandFire;
+import com.github.alexthe666.iceandfire.entity.EntityStymphalianBird;
+import com.github.alexthe666.iceandfire.entity.util.Maths;
+import com.github.alexthe666.iceandfire.misc.IafBlockPos;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
@@ -19,7 +18,7 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.EnumSet;
 
-public class CrowAIFollowOwner extends Goal {
+public class StymphailianBirdAIFollowOwner extends Goal {
     private final EntityCrow crow;
     private final LevelReader world;
     private final double followSpeed;
