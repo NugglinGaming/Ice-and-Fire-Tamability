@@ -70,6 +70,9 @@ public class IafItemTags extends ItemTagsProvider {
     public static TagKey<Item> TEMPT_DRAGON = createKey("tempt_dragon");
     public static TagKey<Item> TEMPT_HIPPOCAMPUS = createKey("tempt_hippocampus");
     public static TagKey<Item> TEMPT_HIPPOGRYPH = createKey("tempt_hippogryph");
+    public static TagKey<Item> TAME_STYMPHAILIANBIRD = createKey("tame_stymphailianbird");
+    public static TagKey<Item> HEAL_STYMPHAILIANBIRD = createKey("heal_stymphailianbird");
+    public static TagKey<Item> BREED_STYMPHAILIANBIRD = createKey("breed_stymphailianbird");
 
     public IafItemTags(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, CompletableFuture<TagsProvider.TagLookup<Block>> blockTags, ExistingFileHelper helper) {
         super(output, lookupProvider, blockTags, IceAndFire.MODID, helper);
@@ -225,6 +228,16 @@ public class IafItemTags extends ItemTagsProvider {
         tag(TEMPT_HIPPOGRYPH)
                 .add(Items.RABBIT)
                 .add(Items.COOKED_RABBIT);
+        
+        tag(TAME_STYMPHAILIANBIRD)
+                .add(Items.FIRE_DRAGON_FLESH;
+
+        tag(BREED_STYMPHAILIANBIRD)
+                .add(Items.FIRE_DRAGON_BLOOD;
+
+        tag(HEAL_STYMPHAILIANBIRD)
+                .add(Items.LIGHTNING_DRAGON_FLESH;
+
 
         tag(SCALES_DRAGON_FIRE)
                 .add(IafItemRegistry.DRAGONSCALES_RED.get())
