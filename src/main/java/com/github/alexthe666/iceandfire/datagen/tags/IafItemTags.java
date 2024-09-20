@@ -73,6 +73,7 @@ public class IafItemTags extends ItemTagsProvider {
     public static TagKey<Item> TAME_STYMPHAILIANBIRD = createKey("tame_stymphailianbird");
     public static TagKey<Item> HEAL_STYMPHAILIANBIRD = createKey("heal_stymphailianbird");
     public static TagKey<Item> BREED_STYMPHAILIANBIRD = createKey("breed_stymphailianbird");
+    public static TagKey<Item> INCOMPATIBLE_STYMPH = createKey("incompatible_stymph");
 
     public IafItemTags(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, CompletableFuture<TagsProvider.TagLookup<Block>> blockTags, ExistingFileHelper helper) {
         super(output, lookupProvider, blockTags, IceAndFire.MODID, helper);
@@ -237,6 +238,10 @@ public class IafItemTags extends ItemTagsProvider {
 
         tag(HEAL_STYMPHAILIANBIRD)
                 .add(Items.LIGHTNING_DRAGON_FLESH;
+        tag(ICOMPATIBLE_STYMPH)
+                .add(Items.LIGHTNING_DRAGON_FLESH;
+                .add(Items.FIRE_DRAGON_FLESH;
+                .add(Items.FIRE_DRAGON_BLOOD;
 
 
         tag(SCALES_DRAGON_FIRE)
