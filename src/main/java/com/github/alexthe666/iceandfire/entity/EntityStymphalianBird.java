@@ -4,6 +4,7 @@ import com.github.alexthe666.citadel.animation.Animation;
 import com.github.alexthe666.citadel.animation.AnimationHandler;
 import com.github.alexthe666.citadel.animation.IAnimatedEntity;
 import com.github.alexthe666.iceandfire.IafConfig;
+import com.github.alexthe666.iceandfire.datagen.tags.IafItemTags;
 import com.github.alexthe666.iceandfire.entity.ai.StymphalianBirdAIAirTarget;
 import com.github.alexthe666.iceandfire.entity.ai.StymphalianBirdAIFlee;
 import com.github.alexthe666.iceandfire.entity.ai.StymphalianBirdAITarget;
@@ -12,6 +13,7 @@ import com.github.alexthe666.iceandfire.entity.util.IVillagerFear;
 import com.github.alexthe666.iceandfire.entity.util.StymphalianBirdFlock;
 import com.github.alexthe666.iceandfire.entity.util.Maths;
 import com.github.alexthe666.iceandfire.misc.IafBlockPos;
+import com.github.alexthe666.iceandfire.item.IafItemRegistry;
 import com.github.alexthe666.iceandfire.misc.IafSoundRegistry;
 import com.google.common.base.Predicate;
 import net.minecraft.core.BlockPos;
@@ -25,6 +27,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -83,21 +87,43 @@ public class EntityStymphalianBird extends TamableAnimal implements IAnimatedEnt
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(1, new FloatGoal(this));
+        this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this));
+        this.goalSelector.addGoal(3, new StymphalianBirdAIFollowOwner(this, 1.0D, 4.0F, 2.0F, true));
+        this.goalSelector.addGoal(5, new BreedGoal(this, 1.0D));
+        this.goalSelector.addGoal(7, new AIWalkIdle());
         this.goalSelector.addGoal(2, new StymphalianBirdAIFlee(this, 10));
         this.goalSelector.addGoal(3, new MeleeAttackGoal(this, 1.5D, false));
         this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 1.0D));
         this.goalSelector.addGoal(6, new StymphalianBirdAIAirTarget(this));
         this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, LivingEntity.class, 6.0F));
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
+        this.targetSelector.addGoal(2, new OwnerHurtByTargetGoal(this));
+        this.targetSelector.addGoal(3, new OwnerHurtTargetGoal(this));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new StymphalianBirdAITarget(this, LivingEntity.class, true));
     }
+    
+    public boolean isAlliedTo(Entity entityIn) {
+        if (this.isTame()) {
+            LivingEntity livingentity = this.getOwner();
+            if (entityIn == livingentity) {
+                return true;
+            }
+            if (entityIn instanceof TamableAnimal) {
+                return ((TamableAnimal) entityIn).isOwnedBy(livingentity);
+            }
+            if (livingentity != null) {
+                return livingentity.isAlliedTo(entityIn);
+            }
+        }
 
+        return super.isAlliedTo(entityIn);
+    }
 
     public static AttributeSupplier.Builder bakeAttributes() {
         return Mob.createMobAttributes()
             //HEALTH
-            .add(Attributes.MAX_HEALTH, 24.0D)
+            .add(Attributes.MAX_HEALTH, 45.0D)
             //SPEED
             .add(Attributes.MOVEMENT_SPEED, 0.3D)
             //ATTACK
@@ -119,21 +145,6 @@ public class EntityStymphalianBird extends TamableAnimal implements IAnimatedEnt
     public int getExperienceReward() {
         return 10;
     }
-    
-    @Override
-    protected void registerGoals() {
-        this.goalSelector.addGoal(1, new FloatGoal(this));
-        this.goalSelector.addGoal(3, new CockatriceAIFollowOwner(this, 1.0D, 7.0F, 2.0F));
-        this.goalSelector.addGoal(3, new SitWhenOrderedToGoal(this));
-        this.goalSelector.addGoal(3, new AvoidEntityGoal<>(this, LivingEntity.class, 14.0F, 1.0D, 1.0D, new Predicate<LivingEntity>() {
-            @Override
-            public boolean apply(@Nullable LivingEntity entity) {
-                if (entity instanceof Player) {
-                    return !((Player) entity).isCreative() && !entity.isSpectator();
-                } else {
-                }
-            }
-        }));
         
     @Override
     public void tick() {
@@ -172,6 +183,68 @@ public class EntityStymphalianBird extends TamableAnimal implements IAnimatedEnt
         }
         this.setFlying(tag.getBoolean("Flying"));
     }
+    
+    @Override
+    public @NotNull InteractionResult mobInteract(Player player, @NotNull InteractionHand hand) {
+        ItemStack itemstack = player.getItemInHand(hand);
+
+        if (itemstack != null && itemstack.is(IafItemTags.BREED_STYMPHALIANBIRD)) {
+            if (this.getAge() == 0 && !isInLove()) {
+                this.setOrderedToSit(false);
+                this.setInLove(player);
+                this.playSound(SoundEvents.GENERIC_EAT, 1, 1);
+                if (!player.isCreative()) {
+                    itemstack.shrink(1);
+                }
+            }
+            return InteractionResult.SUCCESS;
+        }
+        if (this.getMainHandItem().is(IafTagRegistry.TAME_STYMPHAILIANBIRD) && !this.isTame()) {
+                    this.usePlayerItem(player, hand, itemstack);
+                    if (random.nextInt(10) == 0) {
+                        this.setTame(true);
+                        if (player != null) {
+                            this.tame(player);
+                        }
+                    }
+        }
+        if (itemstack != null && itemstack.is(IafItemTags.HEAL_STYMPHAILIANBIRD) && this.getHealth() < this.getMaxHealth()) {
+            this.heal(10);
+            this.playSound(SoundEvents.GENERIC_EAT, 1, 1);
+            if (!player.isCreative()) {
+                itemstack.shrink(1);
+            }
+            return InteractionResult.SUCCESS;
+        }
+        if (super.mobInteract(player, hand) == InteractionResult.PASS) {
+            if (itemstack != null && itemstack.getItem() == IafItemRegistry.DRAGON_STAFF.get() && this.isOwnedBy(player)) {
+                if (player.isShiftKeyDown()) {
+                    BlockPos pos = this.blockPosition();
+                    this.homePos = pos;
+                    this.hasHomePosition = true;
+                    player.displayClientMessage(Component.translatable("amphithere.command.new_home", homePos.getX(), homePos.getY(), homePos.getZ()), true);
+                    return InteractionResult.SUCCESS;
+                }
+                return InteractionResult.SUCCESS;
+            }
+            if (this.isOwnedBy(player)) {
+                if (!player.getItemInHand(hand).is(IafItemTags.INCOMPATIBLE_STYMPH) {
+                    this.setCommand(this.getCommand() + 1);
+                    if (this.getCommand() > 2) {
+                        this.setCommand(0);
+                    }
+                    player.displayClientMessage(Component.translatable("amphithere.command." + this.getCommand()), true);
+                    this.playSound(SoundEvents.ZOMBIE_INFECT, 1, 1);
+                    return InteractionResult.SUCCESS;
+                }
+                return InteractionResult.SUCCESS;
+            }
+            }
+
+        }
+        return super.mobInteract(player, hand);
+    }
+
 
     public boolean isFlying() {
         if (level().isClientSide) {
