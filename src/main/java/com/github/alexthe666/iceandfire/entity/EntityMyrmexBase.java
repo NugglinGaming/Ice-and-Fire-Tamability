@@ -60,7 +60,7 @@ import javax.annotation.Nullable;
 import java.util.Set;
 import java.util.UUID;
 
-public abstract class EntityMyrmexBase extends Animal implements IAnimatedEntity, Merchant, ICustomSizeNavigator, IPassabilityNavigator, IHasCustomizableAttributes {
+public abstract class EntityMyrmexBase extends TameableAnimal implements IAnimatedEntity, Merchant, ICustomSizeNavigator, IPassabilityNavigator, IHasCustomizableAttributes {
 
     public static final Animation ANIMATION_PUPA_WIGGLE = Animation.create(20);
     private static final EntityDataAccessor<Byte> CLIMBING = SynchedEntityData.defineId(EntityMyrmexBase.class, EntityDataSerializers.BYTE);
